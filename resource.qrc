@@ -1,0 +1,20 @@
+<RCC>
+    <qresource prefix="/images">
+        <file alias="arrows.png">res/arrows.png</file>
+        <file alias="pirategirl.jpg">res/PirateGirl2.jpg</file>
+        <file alias="splash.png">res/splash_scr.png</file>
+        <file alias="users.png">res/users.png</file>
+    </qresource>
+    <qresource prefix="/icons">
+        <file>res/ADLSearch.ico</file>
+        <file>res/FinishedDL.ico</file>
+        <file>res/FinishedUL.ico</file>
+        <file>res/main_icon.ico</file>
+        <file>res/netstats.ico</file>
+        <file>res/pirateship_icon.ico</file>
+        <file>res/Queue.ico</file>
+        <file>res/Recents.ico</file>
+        <file>res/Search.ico</file>
+        <file>res/tray_icon.ico</file>
+    </qresource>
+</RCC>

@@ -1,0 +1,10 @@
+## FilePirate ##
+#### Really Advanced LAN Party File Sharing ####
+
+FilePirate - Really Advanced, yet super easy, LAN Party File Sharing written using C++ and Qt. The original FilePirate started being written using C# and the .Net framework, but work has started to port the application to Qt/C++ for some better cross-platform capability.
+
+The main reason I started FilePirate was a learning experience, however I have come to realize the need for a good, decentralized file sharing application, specifically for LAN parties. If you're sick of running a hub, attempting to support hundreds of different clients all with different standards on one hub, sick of waiting hours for files to hash, or simply just want something easy - install, run, share - then FilePirate may be just what you're looking for!
+
+## License ##
+
+FilePirate is released under the MIT License and is copyright &copy; 2011 Jonathan Enzinna.  A copy of the license is available in the LICENSE file.
