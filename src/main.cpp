@@ -31,6 +31,8 @@
 #include <QThread>
 #include <QPixmap>
 #include <QSharedMemory>
+#include <QMutex>
+#include <QWaitCondition>
 
 int main(int argc, char *argv[])
 {
@@ -40,21 +42,30 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-    QSplashScreen *splash = new QSplashScreen;
-    splash->setPixmap(QPixmap::fromImage(QImage::fromData(":/images/splash.png")));
+    QPixmap pixmap(":/images/splash.png");
+    QSplashScreen *splash = new QSplashScreen(pixmap);
     splash->show();
-
+    a.processEvents();
     splash->showMessage("Loading...",Qt::AlignCenter | Qt::AlignBottom,Qt::white);
     QDesktopServices::setUrlHandler("pirate",&FilePirate::Application(),"handleUrl");
     a.processEvents();
+    // Force the user to see the splash screen for at least some time
+    QMutex dummy;
+    dummy.lock();
+    QWaitCondition wait;
+    wait.wait(&dummy, 750);
+    dummy.unlock();
+    // And move on to the rest of loading
     splash->showMessage("Loading settings...",Qt::AlignCenter | Qt::AlignBottom,Qt::white);
     // load the settings here
     FilePirate::Application().settingsLoaded = FilePirate::Application().loadSettings();
-
     splash->showMessage("Loading local filelist...",Qt::AlignCenter | Qt::AlignBottom,Qt::white);
+    FilePirate::Application().fileMon->fullRefreshFileList();
+
     // bring up the filelist - this is a good time to start up the settings dialog
     // if the user hasn't done so yet...
-
+    splash->showMessage("Finishing up...",Qt::AlignCenter | Qt::AlignBottom,Qt::white);
+    FilePirate::Application().moveHelpersToThreads();
 
     MainWindow w;
     w.show();

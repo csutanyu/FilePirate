@@ -25,18 +25,29 @@
 #define FILELIST_H
 
 #include <QObject>
+#include <QList>
+
+#include "file.h"
 
 class FileList : public QObject
 {
     Q_OBJECT
 public:
     explicit FileList(QObject *parent = 0);
-
+    void addFile(QString path);
+    void removeFile(int index);
+    File getFile(int index);
+    void clear();
+    void updateFile(QString path);
+    File find(QString needle);
+    File get(QString path);
 signals:
     void shareSizeChanged(ulong size);
     void fileListChanged();
 public slots:
-
+private:
+    uint64_t listSize;
+    QList<File> files;
 };
 
 #endif // FILELIST_H

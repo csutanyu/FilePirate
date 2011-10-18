@@ -22,6 +22,8 @@
 
 #include <QObject>
 #include <QUrl>
+#include <QStringList>
+#include <QThread>
 
 #include "filelist.h"
 #include "localfilemonitor.h"
@@ -39,11 +41,13 @@ public:
         static FilePirate instance;
         return instance;
     }
+    void saveSettings();
     bool loadSettings();
+    void moveHelpersToThreads();
 
-    LocalFileMonitor fileMon;
-    FileList localFileList;
-    QList<QString> sharedFolders;
+    LocalFileMonitor* fileMon;
+    FileList* localFileList;
+    QStringList sharedFolders;
     QString username;
     QString defaultDownloadPath;
     bool announceAsAdmin;
@@ -57,16 +61,20 @@ public:
     ulong maximumUpload;
     ulong maximumDownload;
     bool settingsLoaded;
+signals:
+    void settingsChanged();
 public slots:
     void handleUrl(const QUrl &url);
 private slots:
     void localFileListChanged();
     void localShareSizeChanged(ulong size);
 private:
+    ulong str2long(const char *s);
     FilePirate();
     // unused for the pattern - don't implement
     FilePirate(FilePirate const&);
     void operator=(FilePirate const&);
+    QThread* fileMonitorThread;
 };
 
 #endif // FILEPIRATE_H

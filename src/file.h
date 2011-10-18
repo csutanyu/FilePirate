@@ -20,48 +20,28 @@
 * THE SOFTWARE.
 */
 
+#ifndef FILE_H
+#define FILE_H
 
-#include "localfilemonitor.h"
-#include <QTimer>
-#include <QFileSystemWatcher>
-#include <QFuture>
-#include <QtConcurrentRun>
+#include <QObject>
+#include <QByteArray>
 
-#include "filelist.h"
-#include "filepirate.h"
-
-LocalFileMonitor::LocalFileMonitor(QObject *parent) :
-    QObject(parent)
+class File : public QObject
 {
-    refreshTimer.setInterval(30000000);
-    this->fsWatch = new QFileSystemWatcher(this);
-    connect(&refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerEvent()));
-    connect(this->fsWatch, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
-    connect(this->fsWatch, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
-}
+    Q_OBJECT
+public:
+    explicit File(QObject *parent = 0, const QString path = 0);
+    QByteArray getHashValue();
+    QString getFilePath();
+    uint64_t getFileSize();
+    void forceUpdate();
+signals:
 
-void LocalFileMonitor::updateWatchPaths()
-{
-    this->fsWatch->removePaths(this->fsWatch->directories());
-    this->fsWatch->addPaths(FilePirate::Application().sharedFolders);
-}
+public slots:
+private:
+    QString filePath;
+    QByteArray hashValue;
+    uint64_t fileSize;
+};
 
-void LocalFileMonitor::refreshTimerEvent()
-{
-    this->fullRefreshFileList();
-}
-
-void LocalFileMonitor::fullRefreshFileList()
-{
-    emit refreshStarted();
-    refreshTimer.stop();
-    // Refresh the file list
-
-    refreshTimer.start();
-    emit refreshCompleted();
-}
-
-void LocalFileMonitor::startTimer()
-{
-    refreshTimer.start();
-}
+#endif // FILE_H

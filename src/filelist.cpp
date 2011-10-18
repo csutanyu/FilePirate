@@ -22,8 +22,73 @@
 
 
 #include "filelist.h"
+#include "file.h"
 
 FileList::FileList(QObject *parent) :
     QObject(parent)
 {
+}
+
+void FileList::addFile(QString path)
+{
+    File newFile(this,path);
+    listSize += newFile.getFileSize();
+    files.append(newFile);
+    emit fileListChanged();
+    emit shareSizeChanged(listSize);
+}
+
+void FileList::clear()
+{
+    files.removeAll();
+    listSize = 0;
+    emit fileListChanged();
+    emit shareSizeChanged(listSize);
+}
+
+void FileList::removeFile(int index)
+{
+    File f = files.at(index);
+    listSize -= f.getFileSize();
+    files.removeAt(index);
+    emit fileListChanged();
+    emit shareSizeChanged(listSize);
+}
+
+File FileList::getFile(int index)
+{
+    return files.at(index);
+}
+
+File FileList::find(QString needle)
+{
+    for (int i = 0; i < files.count(); ++i)
+    {
+        if (files.at(i).getFilePath().contains(needle, Qt::CaseInsensitive))
+            return files.at(i);
+    }
+    return 0;
+}
+
+File FileList::get(QString path)
+{
+    for (int i = 0; i < files.count(); ++i)
+    {
+        if (files.at(i).getFilePath().toUpper() == path.toUpper())
+            return files.at(i);
+    }
+    return 0;
+}
+
+void FileList::updateFile(QString path)
+{
+    File f = get(path);
+    if (f != 0)
+    {
+        listSize -= f.getFileSize();
+        // Update
+        f.forceUpdate();
+        listSize += f.getFileSize();
+        emit shareSizeChanged(listSize);
+    }
 }

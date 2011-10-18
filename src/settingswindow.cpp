@@ -72,6 +72,17 @@ void SettingsWindow::saveSettings()
 
     // write settings to the FilePirate::Application object and signal
     // it to write the XML
+    FilePirate::Application().username = ui->usernameEdit->text();
+    FilePirate::Application().announceAsAdmin = ui->announceAdminCheck->checkState();
+    FilePirate::Application().announceKey = ui->announceKeyEdit->text();
+    // Download/upload speed limits
+    FilePirate::Application().maximumDownload = ui->downloadSpeedSlider->value();
+    FilePirate::Application().maximumUpload = ui->uploadSpeedSlider->value();
+    // Slot limits
+    FilePirate::Application().maxDownloadSlots = ui->downloadSlotSlider->value();
+    FilePirate::Application().maxUploadSlots = ui->uploadSlotSlider->value();
+    // Signal to save
+    FilePirate::Application().saveSettings();
 
     this->close();
 }

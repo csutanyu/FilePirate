@@ -22,7 +22,10 @@ SOURCES += \
     src/filelist.cpp \
     src/localfilemonitor.cpp \
     src/settingswindow.cpp \
-    src/aboutwindow.cpp
+    src/aboutwindow.cpp \
+    src/sleepthread.cpp \
+    src/file.cpp \
+    src/fphash.cpp
 
 HEADERS  += \
     src/filepirate.h \
@@ -33,7 +36,10 @@ HEADERS  += \
     src/filelist.h \
     src/localfilemonitor.h \
     src/settingswindow.h \
-    src/aboutwindow.h
+    src/aboutwindow.h \
+    src/sleepthread.h \
+    src/file.h \
+    src/fphash.h
 
 FORMS    += \
     src/mainwindow.ui \

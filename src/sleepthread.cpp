@@ -20,48 +20,6 @@
 * THE SOFTWARE.
 */
 
+#include "sleepthread.h"
 
-#include "localfilemonitor.h"
-#include <QTimer>
-#include <QFileSystemWatcher>
-#include <QFuture>
-#include <QtConcurrentRun>
-
-#include "filelist.h"
-#include "filepirate.h"
-
-LocalFileMonitor::LocalFileMonitor(QObject *parent) :
-    QObject(parent)
-{
-    refreshTimer.setInterval(30000000);
-    this->fsWatch = new QFileSystemWatcher(this);
-    connect(&refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerEvent()));
-    connect(this->fsWatch, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
-    connect(this->fsWatch, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
-}
-
-void LocalFileMonitor::updateWatchPaths()
-{
-    this->fsWatch->removePaths(this->fsWatch->directories());
-    this->fsWatch->addPaths(FilePirate::Application().sharedFolders);
-}
-
-void LocalFileMonitor::refreshTimerEvent()
-{
-    this->fullRefreshFileList();
-}
-
-void LocalFileMonitor::fullRefreshFileList()
-{
-    emit refreshStarted();
-    refreshTimer.stop();
-    // Refresh the file list
-
-    refreshTimer.start();
-    emit refreshCompleted();
-}
-
-void LocalFileMonitor::startTimer()
-{
-    refreshTimer.start();
-}
+SleepThread::SleepThread(){}

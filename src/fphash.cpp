@@ -20,48 +20,25 @@
 * THE SOFTWARE.
 */
 
+#include "fphash.h"
+#include <QByteArray>
+#include <QFile>
+#include <QCryptographicHash>
 
-#include "localfilemonitor.h"
-#include <QTimer>
-#include <QFileSystemWatcher>
-#include <QFuture>
-#include <QtConcurrentRun>
-
-#include "filelist.h"
-#include "filepirate.h"
-
-LocalFileMonitor::LocalFileMonitor(QObject *parent) :
-    QObject(parent)
+QByteArray FPHash::getFileHash(const QString &fileName)
 {
-    refreshTimer.setInterval(30000000);
-    this->fsWatch = new QFileSystemWatcher(this);
-    connect(&refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerEvent()));
-    connect(this->fsWatch, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));
-    connect(this->fsWatch, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
-}
+    QByteArray byteArray;
+    QFile file(fileName);
 
-void LocalFileMonitor::updateWatchPaths()
-{
-    this->fsWatch->removePaths(this->fsWatch->directories());
-    this->fsWatch->addPaths(FilePirate::Application().sharedFolders);
-}
+    if (!file.exists())
+    {
+        if (file.open(QIODevice::ReadOnly))
+        {
+            while (!file.atEnd())
+                byteArray.append(QCryptographicHash::hash(file.read(HASH_BUFFER_SIZE),QCryptographicHash::Md5));
+            byteArray = QCryptographicHash::hash(byteArray,QCryptographicHash::Sha1);
+        }
+    }
 
-void LocalFileMonitor::refreshTimerEvent()
-{
-    this->fullRefreshFileList();
-}
-
-void LocalFileMonitor::fullRefreshFileList()
-{
-    emit refreshStarted();
-    refreshTimer.stop();
-    // Refresh the file list
-
-    refreshTimer.start();
-    emit refreshCompleted();
-}
-
-void LocalFileMonitor::startTimer()
-{
-    refreshTimer.start();
+    return byteArray;
 }

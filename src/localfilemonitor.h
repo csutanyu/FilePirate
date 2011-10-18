@@ -26,21 +26,28 @@
 
 #include <QObject>
 #include <QTimer>
+#include <QFileSystemWatcher>
+
+#include "filelist.h"
 
 class LocalFileMonitor : public QObject
 {
     Q_OBJECT
 public:
     explicit LocalFileMonitor(QObject *parent = 0);
-    void refreshFileList();
+    void fullRefreshFileList();
     void startTimer();
 signals:
     void refreshStarted();
     void refreshCompleted();
 public slots:
+    void updateWatchPaths();
 private slots:
     void refreshTimerEvent();
+    void fileChanged(QString path);
+    void directoryChanged(QString path);
 private:
+    QFileSystemWatcher* fsWatch;
     QTimer refreshTimer;
 };
 
