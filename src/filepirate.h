@@ -47,13 +47,15 @@ public:
 
     LocalFileMonitor* fileMon;
     FileList* localFileList;
-    QStringList sharedFolders;
+    QMap<QString, QString> sharedFolders;
     QString username;
     QString defaultDownloadPath;
     bool announceAsAdmin;
     QString announceKey;
     bool overridePreferredHash;
     uint16_t overriddenHashAlgorithm;
+    bool allocateAllDownloads;
+    bool appendUploadingUsername;
     bool enableAVIntegration;
     QString avExPath;
     uint16_t maxUploadSlots;

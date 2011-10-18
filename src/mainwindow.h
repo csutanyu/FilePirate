@@ -47,6 +47,7 @@ private:
 private slots:
     void exitClicked();
     void aboutClicked();
+    void settingsClicked();
 };
 
 #endif // MAINWINDOW_H

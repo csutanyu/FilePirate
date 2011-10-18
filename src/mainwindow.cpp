@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     // connect signals and shit
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(exitClicked()));
     connect(ui->actionAbout_FilePirate,SIGNAL(triggered()),this,SLOT(aboutClicked()));
+    connect(ui->actionSettings,SIGNAL(triggered()),this,SLOT(settingsClicked()));
 
     if (!FilePirate::Application().settingsLoaded)
     {
@@ -59,8 +60,16 @@ void MainWindow::exitClicked()
 
 void MainWindow::aboutClicked()
 {
-    settingsWindow.setParent(this, Qt::WindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint));
+    aboutWindow.setParent(this, Qt::WindowFlags(Qt::Dialog | Qt::WindowCloseButtonHint));
     aboutWindow.show();
     aboutWindow.raise();
     aboutWindow.activateWindow();
+}
+
+void MainWindow::settingsClicked()
+{
+    settingsWindow.setParent(this, Qt::WindowFlags(Qt::Dialog));
+    settingsWindow.show();
+    settingsWindow.raise();
+    settingsWindow.activateWindow();
 }

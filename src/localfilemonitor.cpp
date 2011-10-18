@@ -40,10 +40,38 @@ LocalFileMonitor::LocalFileMonitor(QObject *parent) :
     connect(this->fsWatch, SIGNAL(directoryChanged(QString)), this, SLOT(directoryChanged(QString)));
 }
 
+void LocalFileMonitor::fileChanged(QString path)
+{
+    // Determine the shared folder to find the shared name
+
+}
+
+void LocalFileMonitor::directoryChanged(QString path)
+{
+    // Remove all from that folder and refresh
+    QMapIterator<QString, QString> i(FilePirate::Application().sharedFolders);
+    while (i.hasNext())
+    {
+        i.next();
+        if (path.contains(i.value()))
+        {
+            FilePirate::Application().localFileList->clearFolder(i.key());
+            break;
+        }
+    }
+    fullRefreshFileList();
+    emit refreshStarted();
+}
+
 void LocalFileMonitor::updateWatchPaths()
 {
     this->fsWatch->removePaths(this->fsWatch->directories());
-    this->fsWatch->addPaths(FilePirate::Application().sharedFolders);
+    QMapIterator<QString, QString> i(FilePirate::Application().sharedFolders);
+    while (i.hasNext())
+    {
+        i.next();
+        this->fsWatch->addPath(i.value());
+    }
 }
 
 void LocalFileMonitor::refreshTimerEvent()

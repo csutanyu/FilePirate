@@ -42,6 +42,8 @@ private slots:
     void cancelSettings();
     void beginDownloadPathBrowse();
     void launchAnnounceKeyHelpURL();
+    void addSharedFolder();
+    void removeSharedFolder();
 private:
     Ui::SettingsWindow *ui;
 };

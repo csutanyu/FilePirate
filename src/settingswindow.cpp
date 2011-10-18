@@ -24,8 +24,11 @@
 #include "settingswindow.h"
 #include "ui_settingswindow.h"
 #include "filepirate.h"
+#include "defines.h"
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QInputDialog>
+#include <QMapIterator>
 #include <QDesktopServices>
 
 SettingsWindow::SettingsWindow(QWidget *parent) :
@@ -46,6 +49,8 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     connect(ui->announceKeyHelpLink, SIGNAL(clicked()), this, SLOT(launchAnnounceKeyHelpURL()));
     connect(ui->enableAVIntCheck, SIGNAL(clicked(bool)), ui->avIntGroupFrame, SLOT(setEnabled(bool)));
     connect(ui->overrideHashAlgoCheck, SIGNAL(clicked(bool)), ui->preferrredHashAlgorithm, SLOT(setEnabled(bool)));
+    connect(ui->addFolderButton, SIGNAL(clicked()), this, SLOT(addSharedFolder()));
+    connect(ui->removeFolderButton, SIGNAL(clicked()), this, SLOT(removeSharedFolder()));
 
     // load settings in
     ui->usernameEdit->setText(FilePirate::Application().username);
@@ -53,9 +58,21 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     ui->downloadSlotSlider->setValue(FilePirate::Application().maxDownloadSlots);
     ui->uploadSpeedSlider->setValue(FilePirate::Application().maximumUpload);
     ui->downloadSpeedSlider->setValue(FilePirate::Application().maximumDownload);
-
     ui->announceKeyEdit->setEnabled(ui->announceAdminCheck->checkState() == Qt::Checked);
     ui->preferrredHashAlgorithm->setEnabled(ui->overrideHashAlgoCheck->checkState() == Qt::Checked);
+    ui->enableAVIntCheck->setChecked(FilePirate::Application().enableAVIntegration);
+    ui->avExeNameLabel->setText(FilePirate::Application().avExPath.section(DIRECTORY_SEPARATOR,-1));
+    ui->defaultDownloadPathEdit->setText(FilePirate::Application().defaultDownloadPath);
+    ui->preAllocateFilesCheck->setChecked(FilePirate::Application().allocateAllDownloads);
+    ui->announceAdminCheck->setChecked(FilePirate::Application().announceAsAdmin);
+    ui->announceKeyEdit->setText(FilePirate::Application().announceKey);
+
+    QMapIterator<QString, QString> i(FilePirate::Application().sharedFolders);
+    while (i.hasNext())
+    {
+        i.next();
+        ui->sharedFoldersList->addItem(QString(i.key()+" : "+i.value()));
+    }
 
     // reset chosen tab
     ui->tabWidget->setCurrentIndex(0);
@@ -81,6 +98,13 @@ void SettingsWindow::saveSettings()
     // Slot limits
     FilePirate::Application().maxDownloadSlots = ui->downloadSlotSlider->value();
     FilePirate::Application().maxUploadSlots = ui->uploadSlotSlider->value();
+    // Shared Folders
+    FilePirate::Application().sharedFolders.clear();
+    for (int i = 0; i < ui->sharedFoldersList->count(); ++i)
+    {
+        QStringList item = ui->sharedFoldersList->item(i)->text().split(" : ");
+        FilePirate::Application().sharedFolders[item[0]] = item[1];
+    }
     // Signal to save
     FilePirate::Application().saveSettings();
 
@@ -101,5 +125,26 @@ void SettingsWindow::beginDownloadPathBrowse()
 
 void SettingsWindow::launchAnnounceKeyHelpURL()
 {
-    QDesktopServices::openUrl(QUrl("http://code.google.com/p/filepirate/wiki/WhatAreAnnounceKeys"));
+    QDesktopServices::openUrl(QUrl("http://www.filepirate.us/documentation/announce-keys"));
+}
+
+void SettingsWindow::addSharedFolder()
+{
+    QString dir = QFileDialog::getExistingDirectory(this,"Choose Folder",NULL,
+        QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+    bool ok;
+    QString name = QInputDialog::getText(this, "Name this share", "Share Name:", QLineEdit::Normal,
+        dir.section(DIRECTORY_SEPARATOR,-1), &ok);
+    if (ok)
+    {
+        ui->sharedFoldersList->addItem(QString(name+" : "+dir));
+    }
+}
+
+void SettingsWindow::removeSharedFolder()
+{
+    if (ui->sharedFoldersList->selectedItems().length() == 0)
+        return;
+
+    delete ui->sharedFoldersList->takeItem(ui->sharedFoldersList->currentRow());
 }

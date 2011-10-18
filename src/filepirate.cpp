@@ -20,8 +20,8 @@
 * THE SOFTWARE.
 */
 
-
 #include "filepirate.h"
+#include "defines.h"
 #include <QDir>
 #include <QDesktopServices>
 #include <QtXml/QDomDocument>
@@ -30,14 +30,21 @@
 
 FilePirate::FilePirate()
 {
+    // Defaults
     maximumDownload = 0;
     maximumUpload = 0;
     maxDownloadSlots = 5;
     maxUploadSlots = 5;
+    allocateAllDownloads = false;
+    appendUploadingUsername = false;
+    enableAVIntegration = false;
+    overridePreferredHash = false;
+    announceAsAdmin = false;
+    defaultDownloadPath = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + DIRECTORY_SEPARATOR + "Downloads";
 
     // TODO: load the existing filelist if it exists
     this->localFileList = new FileList(this);
-    this->fileMon = new LocalFileMonitor(this);
+    this->fileMon = new LocalFileMonitor();
     this->fileMonitorThread = new QThread(this);
 
     // Connect all our signals and slots
@@ -63,6 +70,7 @@ void FilePirate::handleUrl(const QUrl &url)
 
 void FilePirate::saveSettings()
 {
+    qDebug("Saving settings...");
     QXmlStreamWriter *xmlWriter = new QXmlStreamWriter();
     QString fileloc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QFile f(fileloc + "/fpconfig.xml");
@@ -87,12 +95,26 @@ void FilePirate::saveSettings()
     xmlWriter->writeAttribute("download",QString::number(maxDownloadSlots));
     xmlWriter->writeAttribute("upload",QString::number(maxUploadSlots));
     xmlWriter->writeEndElement();
+    // Download defaults
+    xmlWriter->writeStartElement("downloads");
+    xmlWriter->writeAttribute("default-path",defaultDownloadPath);
+    xmlWriter->writeAttribute("preallocate",QString(allocateAllDownloads?"true":"false"));
+    xmlWriter->writeAttribute("append-username",QString(appendUploadingUsername?"true":"false"));
+    xmlWriter->writeEndElement();
+    // AV Integration
+    xmlWriter->writeStartElement("av");
+    xmlWriter->writeAttribute("enabled",QString(enableAVIntegration?"true":"false"));
+    xmlWriter->writeAttribute("path",avExPath);
+    xmlWriter->writeEndElement();
     // Shared folder information
     xmlWriter->writeStartElement("shared-folders");
-    for (int i = 0; i < sharedFolders.size(); ++i)
+    QMapIterator<QString, QString> i(sharedFolders);
+    while (i.hasNext())
     {
+        i.next();
         xmlWriter->writeStartElement("folder");
-        xmlWriter->writeAttribute("path",sharedFolders.at(i));
+        xmlWriter->writeAttribute("path",i.value());
+        xmlWriter->writeAttribute("name",i.key());
         xmlWriter->writeEndElement();
     }
     xmlWriter->writeEndElement();
@@ -101,6 +123,7 @@ void FilePirate::saveSettings()
     // End document and write
     xmlWriter->writeEndDocument();
     delete xmlWriter;
+    qDebug("DONE!");
     emit settingsChanged();
 }
 
@@ -135,26 +158,45 @@ bool FilePirate::loadSettings()
     QDomNodeList nodes = doc.documentElement().childNodes();
     if (nodes.count() == 0)
         return false;
+    qDebug("Loading settings...");
     for (int i = 0; i < nodes.count(); i++)
     {
         if (nodes.at(i).nodeName().toUpper() == "USER") {
+            qDebug("Processing user information...");
             username = nodes.at(i).attributes().namedItem("username").nodeValue();
-            announceAsAdmin = (nodes.at(i).attributes().namedItem("announce").nodeValue() == "true");
+            announceAsAdmin = (nodes.at(i).attributes().namedItem("announce").nodeValue().toLower() == "true");
             announceKey = nodes.at(i).attributes().namedItem("key").nodeValue();
         } else if (nodes.at(i).nodeName().toUpper() == "LIMITS") {
+            qDebug("Processing limits...");
             maximumDownload = str2long((const char *)nodes.at(i).attributes().namedItem("download").nodeValue().toLocal8Bit().data());
             maximumUpload = str2long((const char *)nodes.at(i).attributes().namedItem("upload").nodeValue().toLocal8Bit().data());
         } else if (nodes.at(i).nodeName().toUpper() == "SLOTS") {
+            qDebug("Processing slots...");
             maxDownloadSlots = str2long((const char *)nodes.at(i).attributes().namedItem("download").nodeValue().toLocal8Bit().data());
             maxUploadSlots = str2long((const char *)nodes.at(i).attributes().namedItem("upload").nodeValue().toLocal8Bit().data());
+        } else if (nodes.at(i).nodeName().toUpper() == "DOWNLOADS") {
+            qDebug("Processing downloads...");
+            defaultDownloadPath = nodes.at(i).attributes().namedItem("default-path").nodeValue();
+            appendUploadingUsername = (nodes.at(i).attributes().namedItem("append-username").nodeValue().toLower() == "true");
+            allocateAllDownloads = (nodes.at(i).attributes().namedItem("preallocate").nodeValue().toLower() == "true");
+        } else if (nodes.at(i).nodeName().toUpper() == "AV") {
+            qDebug("Processing AV settings...");
+            enableAVIntegration = (nodes.at(i).attributes().namedItem("enabled").nodeValue().toLower() == "true");
+            avExPath = nodes.at(i).attributes().namedItem("path").nodeValue();
         } else if (nodes.at(i).nodeName().toUpper() == "SHARED-FOLDERS") {
-            for (int i = 0; i < nodes.at(i).childNodes().count(); ++i)
+            qDebug("Processing "+QString::number(nodes.at(i).childNodes().count()).toAscii()+" shared folders");
+            for (int c = 0; c < nodes.at(i).childNodes().count(); ++c)
             {
-                if (nodes.at(i).childNodes().at(i).nodeName().toUpper() == "FOLDER")
-                    sharedFolders.append(nodes.at(i).childNodes().at(i).namedItem("path").nodeValue());
+                if (nodes.at(i).childNodes().at(c).nodeName().toUpper() == "FOLDER")
+                {
+                    sharedFolders[nodes.at(i).childNodes().at(c).attributes().namedItem("name").nodeValue()] = nodes.at(i).childNodes().at(c).attributes().namedItem("path").nodeValue();
+                    qDebug("Sharing folder "+nodes.at(i).childNodes().at(c).attributes().namedItem("name").nodeValue().toAscii()+" as "+nodes.at(i).childNodes().at(c).attributes().namedItem("path").nodeValue().toAscii());
+                }
             }
         }
     }
+
+    qDebug("Done loading settings");
 
     fileMon->startTimer();
     return true;

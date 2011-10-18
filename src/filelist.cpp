@@ -21,74 +21,57 @@
 */
 
 
+#include <QMap>
+#include <QMapIterator>
+#include <QPointer>
+
 #include "filelist.h"
 #include "file.h"
 
 FileList::FileList(QObject *parent) :
     QObject(parent)
 {
+    files = QMap<QString, QPointer<File> >();
 }
 
-void FileList::addFile(QString path)
+void FileList::addFile(QString sharedName, QString path)
 {
-    File newFile(this,path);
-    listSize += newFile.getFileSize();
-    files.append(newFile);
+    files[sharedName] = &File(this, path);
+}
+
+void FileList::clearFolder(QString sharedFolder)
+{
+    QMapIterator<QString, QPointer<File> > i(files);
+    while (i.hasNext())
+    {
+        i.next();
+        if (i.key().startsWith(sharedFolder))
+        {
+            listSize -= i.value()->getFileSize();
+            files.remove(i.key());
+        }
+    }
     emit fileListChanged();
     emit shareSizeChanged(listSize);
 }
 
 void FileList::clear()
 {
-    files.removeAll();
-    listSize = 0;
-    emit fileListChanged();
-    emit shareSizeChanged(listSize);
+    files.clear();
 }
 
-void FileList::removeFile(int index)
+void FileList::removeFile(QString sharedName)
 {
-    File f = files.at(index);
-    listSize -= f.getFileSize();
-    files.removeAt(index);
-    emit fileListChanged();
-    emit shareSizeChanged(listSize);
+    files.remove(sharedName);
 }
 
-File FileList::getFile(int index)
+File* FileList::getFile(QString sharedName)
 {
-    return files.at(index);
+    return files[sharedName];
 }
 
-File FileList::find(QString needle)
-{
-    for (int i = 0; i < files.count(); ++i)
-    {
-        if (files.at(i).getFilePath().contains(needle, Qt::CaseInsensitive))
-            return files.at(i);
-    }
-    return 0;
-}
 
-File FileList::get(QString path)
+void FileList::updateFile(QString sharedName)
 {
-    for (int i = 0; i < files.count(); ++i)
-    {
-        if (files.at(i).getFilePath().toUpper() == path.toUpper())
-            return files.at(i);
-    }
-    return 0;
-}
-
-void FileList::updateFile(QString path)
-{
-    File f = get(path);
-    if (f != 0)
-    {
-        listSize -= f.getFileSize();
-        // Update
-        f.forceUpdate();
-        listSize += f.getFileSize();
-        emit shareSizeChanged(listSize);
-    }
+    files[sharedName]->forceUpdate();
 }

@@ -39,7 +39,8 @@ HEADERS  += \
     src/aboutwindow.h \
     src/sleepthread.h \
     src/file.h \
-    src/fphash.h
+    src/fphash.h \
+    src/defines.h
 
 FORMS    += \
     src/mainwindow.ui \
@@ -54,3 +55,4 @@ RC_FILE += filepirate.rc
 OTHER_FILES += \
     filepirate.rc \
     filepirate.ico
+

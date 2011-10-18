@@ -55,3 +55,8 @@ void File::forceUpdate()
         fh.close();
     }
 }
+
+QString File::getFilePath()
+{
+    return filePath;
+}
