@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -27,7 +27,7 @@
 #include <QFuture>
 #include <QtConcurrentRun>
 
-#include "filelist.h"
+#include "localfilelist.h"
 #include "filepirate.h"
 
 LocalFileMonitor::LocalFileMonitor(QObject *parent) :
@@ -55,7 +55,7 @@ void LocalFileMonitor::directoryChanged(QString path)
         i.next();
         if (path.contains(i.value()))
         {
-            FilePirate::Application().localFileList->clearFolder(i.key());
+            FilePirate::Application().localList->clearFolder(i.key());
             break;
         }
     }

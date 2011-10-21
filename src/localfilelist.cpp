@@ -20,60 +20,66 @@
 * THE SOFTWARE.
 */
 
-#include "file.h"
-#include "fphash.h"
 
 #include <QMap>
-#include <QStringList>
+#include <QMapIterator>
+#include <QPointer>
 #include <QFile>
-#include <QVariant>
-#include <QSqlRecord>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
 
+#include "localfilelist.h"
+#include "file.h"
+#include "filelist.h"
+#include "filepirate.h"
 
-File::File(QObject *parent, uint32_t id, QString path, QString share, QByteArray hash) :
+LocalFileList::LocalFileList(QObject *parent) :
     QObject(parent)
 {
-    filePath = path;
-    if (hash == 0)
-        hashValue = FPHash::getFileHash(filePath);
-    else
-        hashValue = hash;
-    shareName = share;
-    fileId = id;
-    QFile fh;
-    if (fh.open(QIODevice::ReadOnly))
-    {
-        fileSize = fh.size();
-        fh.close();
+    bool generateSchema = QFile::exists(FilePirate::StoragePath+"local-barrel.rum");
+    db = new QSqlDatabase();
+    db->addDatabase("SQLITE");
+    db->setDatabaseName(FilePirate::StoragePath+"local-barrel.rum");
+    if (db->open() && generateSchema) {
+        qWarning() << "Could not open local barrel or barrel is new";
+        FileList::GenerateSchema(db);
+    } else {
+        // we should throw an error here
+
     }
 }
 
-File* File::fromQuery(QSqlQuery q)
+void LocalFileList::addFile(QString path)
 {
-    uint32_t id = q.value(0).toInt();
-    QString share = q.value(q.record().indexOf("shareName")).toString();
-    QString path = q.value(q.record().indexOf("filePath")).toString();
-    QByteArray hash = q.value(q.record().indexOf("fileHash")).toByteArray();
-    return new File(0,id,path,share,hash);
+
 }
 
-uint64_t File::getFileSize()
+void LocalFileList::clearFolder(QString sharedFolder)
 {
-    return fileSize;
+
+    emit fileListChanged();
+    emit shareSizeChanged(listSize);
 }
 
-void File::forceUpdate()
+void LocalFileList::clear()
 {
-    hashValue = FPHash::getFileHash(filePath);
-    QFile fh;
-    if (fh.open(QIODevice::ReadOnly))
-    {
-        fileSize = fh.size();
-        fh.close();
-    }
+
 }
 
-QString File::getFilePath()
+void LocalFileList::removeFile(uint32_t id)
 {
-    return filePath;
+    db->exec("DELETE FROM files WHERE id="+QString::number(id));
+}
+
+File* LocalFileList::getFile(uint32_t id)
+{
+    QSqlQuery result = db->exec("SELECT FROM files WHERE id="+QString::number(id));
+    if (!result.first())
+        return 0;
+    return File::fromQuery(result);
+}
+
+void LocalFileList::updateFile(uint32_t id)
+{
+
 }

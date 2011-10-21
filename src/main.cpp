@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -34,11 +34,56 @@
 #include <QMutex>
 #include <QWaitCondition>
 
+#ifndef QT_DEBUG
+#include <QDateTime>
+#include <QtDebug>
+#include <QFile>
+#include <QIODevice>
+
+QTextStream *out = 0;
+
+void logOutput(QtMsgType type, const char *msg)
+{
+    QString debugdate = QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss");
+    switch (type)
+    {
+    case QtDebugMsg:
+        debugdate += "[D]";
+        break;
+    case QtWarningMsg:
+        debugdate += "[W]";
+        break;
+    case QtCriticalMsg:
+        debugdate += "[C]";
+        break;
+    case QtFatalMsg:
+        debugdate += "[F]";
+    }
+    (*out) << debugdate << " " << msg << endl;
+
+    if (QtFatalMsg == type)
+    {
+        abort();
+    }
+}
+#endif
+
 int main(int argc, char *argv[])
 {
     QSharedMemory sharedMemory("FilePirateClient");
     if (!sharedMemory.create(1) || sharedMemory.error() == QSharedMemory::AlreadyExists)
         return 0;
+
+#ifndef QT_DEBUG
+    QString fileName = FilePirate::StoragePath + "captains-log.log";
+    QFile *log = new QFile(fileName);
+    if (log->open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        out = new QTextStream(log);
+        qInstallMsgHandler(logOutput);
+    } else {
+        qDebug() << "Error opening log file '" << fileName << "'. All debug output redirected to console.";
+    }
+#endif
 
     QApplication a(argc, argv);
 
@@ -47,6 +92,7 @@ int main(int argc, char *argv[])
     splash->show();
     a.processEvents();
     splash->showMessage("Loading...",Qt::AlignCenter | Qt::AlignBottom,Qt::white);
+    qDebug() << "Registering URL handler...";
     QDesktopServices::setUrlHandler("pirate",&FilePirate::Application(),"handleUrl");
     a.processEvents();
     // Force the user to see the splash screen for at least some time

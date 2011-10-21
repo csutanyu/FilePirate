@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,30 +25,21 @@
 #define FILELIST_H
 
 #include <QObject>
-#include <QPointer>
-#include <QMap>
-#include <QList>
-
-#include "file.h"
+#include <QtSql/QSqlDatabase>
 
 class FileList : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileList(QObject *parent = 0);
-    void addFile(QString sharedName, QString path);
-    void removeFile(QString sharedName);
-    File* getFile(QString sharedName);
-    void clear();
-    void clearFolder(QString sharedFolder);
-    void updateFile(QString path);
+    explicit FileList(QObject *parent = 0, QString dbpath = 0);
+    static bool GenerateSchema(QSqlDatabase *db);
 signals:
-    void shareSizeChanged(ulong size);
-    void fileListChanged();
+
 public slots:
+
 private:
-    uint64_t listSize;
-    QMap<QString, QPointer<File> > files;
+    QSqlDatabase *db;
+    bool ready;
 };
 
 #endif // FILELIST_H

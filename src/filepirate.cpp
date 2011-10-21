@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
 #include <QtXml/QDomNodeList>
 #include <QXmlStreamWriter>
 
+QString FilePirate::StoragePath = QDesktopServices::storageLocation(QDesktopServices::DataLocation) + DIRECTORY_SEPARATOR + "FilePirate" + DIRECTORY_SEPARATOR;
+
 FilePirate::FilePirate()
 {
     // Defaults
@@ -42,14 +44,17 @@ FilePirate::FilePirate()
     announceAsAdmin = false;
     defaultDownloadPath = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + DIRECTORY_SEPARATOR + "Downloads";
 
+    if (!QDir(StoragePath).exists())
+        QDir().mkdir(StoragePath);
+
     // TODO: load the existing filelist if it exists
-    this->localFileList = new FileList(this);
+    this->localList = new LocalFileList(this);
     this->fileMon = new LocalFileMonitor();
     this->fileMonitorThread = new QThread(this);
 
     // Connect all our signals and slots
-    connect(this->localFileList, SIGNAL(shareSizeChanged(ulong)), this, SLOT(localShareSizeChanged(ulong)));
-    connect(this->localFileList, SIGNAL(fileListChanged()), this, SLOT(localFileListChanged()));
+    connect(this->localList, SIGNAL(shareSizeChanged(ulong)), this, SLOT(localShareSizeChanged(ulong)));
+    connect(this->localList, SIGNAL(fileListChanged()), this, SLOT(localListChanged()));
     connect(this, SIGNAL(settingsChanged()), this->fileMon, SLOT(updateWatchPaths()));
 }
 
@@ -65,15 +70,14 @@ void FilePirate::localShareSizeChanged(ulong size)
 
 void FilePirate::handleUrl(const QUrl &url)
 {
-    qWarning("f: FilePirate::handleUrl %s", url.toString());
+    qDebug() << "FilePirate::handleUrl " << url.toString();
 }
 
 void FilePirate::saveSettings()
 {
     qDebug("Saving settings...");
     QXmlStreamWriter *xmlWriter = new QXmlStreamWriter();
-    QString fileloc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-    QFile f(fileloc + "/fpconfig.xml");
+    QFile f(StoragePath + "/config.xml");
     f.open(QIODevice::WriteOnly);
     xmlWriter->setDevice(&f);
     xmlWriter->writeStartDocument();
@@ -144,9 +148,8 @@ ulong FilePirate::str2long(const char *s)
 
 bool FilePirate::loadSettings()
 {
-    QString fileloc = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
     QDomDocument doc;
-    QFile f(fileloc + "/fpconfig.xml");
+    QFile f(StoragePath + "/config.xml");
     if (!f.exists()) return false;
     if (!f.open(QIODevice::ReadOnly)) return false;
     if (!doc.setContent(&f))
@@ -156,8 +159,10 @@ bool FilePirate::loadSettings()
     }
     f.close();
     QDomNodeList nodes = doc.documentElement().childNodes();
-    if (nodes.count() == 0)
+    if (nodes.count() == 0) {
+        qWarning() << "Cannot load settings - no nodes found in document";
         return false;
+    }
     qDebug("Loading settings...");
     for (int i = 0; i < nodes.count(); i++)
     {
@@ -184,13 +189,13 @@ bool FilePirate::loadSettings()
             enableAVIntegration = (nodes.at(i).attributes().namedItem("enabled").nodeValue().toLower() == "true");
             avExPath = nodes.at(i).attributes().namedItem("path").nodeValue();
         } else if (nodes.at(i).nodeName().toUpper() == "SHARED-FOLDERS") {
-            qDebug("Processing "+QString::number(nodes.at(i).childNodes().count()).toAscii()+" shared folders");
+            qDebug("Processing "+QString::number(nodes.at(i).childNodes().count()).toAscii()+" shared folder entries...");
             for (int c = 0; c < nodes.at(i).childNodes().count(); ++c)
             {
                 if (nodes.at(i).childNodes().at(c).nodeName().toUpper() == "FOLDER")
                 {
                     sharedFolders[nodes.at(i).childNodes().at(c).attributes().namedItem("name").nodeValue()] = nodes.at(i).childNodes().at(c).attributes().namedItem("path").nodeValue();
-                    qDebug("Sharing folder "+nodes.at(i).childNodes().at(c).attributes().namedItem("name").nodeValue().toAscii()+" as "+nodes.at(i).childNodes().at(c).attributes().namedItem("path").nodeValue().toAscii());
+                    qDebug("Sharing folder "+nodes.at(i).childNodes().at(c).attributes().namedItem("name").nodeValue().toAscii()+" at "+nodes.at(i).childNodes().at(c).attributes().namedItem("path").nodeValue().toAscii());
                 }
             }
         }

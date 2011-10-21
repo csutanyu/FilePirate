@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,57 +21,26 @@
 */
 
 
-#include <QMap>
-#include <QMapIterator>
-#include <QPointer>
-
 #include "filelist.h"
-#include "file.h"
+#include "filepirate.h"
+#include "defines.h"
 
-FileList::FileList(QObject *parent) :
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+
+FileList::FileList(QObject *parent, QString dbpath) :
     QObject(parent)
 {
-    files = QMap<QString, QPointer<File> >();
+    db = new QSqlDatabase();
+    db->addDatabase("SQLITE");
+    db->setDatabaseName(FilePirate::StoragePath+"barrels"+DIRECTORY_SEPARATOR+dbpath+".rum");
+    ready = db->open();
 }
 
-void FileList::addFile(QString sharedName, QString path)
+bool FileList::GenerateSchema(QSqlDatabase *db)
 {
-    files[sharedName] = &File(this, path);
-}
-
-void FileList::clearFolder(QString sharedFolder)
-{
-    QMapIterator<QString, QPointer<File> > i(files);
-    while (i.hasNext())
-    {
-        i.next();
-        if (i.key().startsWith(sharedFolder))
-        {
-            listSize -= i.value()->getFileSize();
-            files.remove(i.key());
-        }
-    }
-    emit fileListChanged();
-    emit shareSizeChanged(listSize);
-}
-
-void FileList::clear()
-{
-    files.clear();
-}
-
-void FileList::removeFile(QString sharedName)
-{
-    files.remove(sharedName);
-}
-
-File* FileList::getFile(QString sharedName)
-{
-    return files[sharedName];
-}
-
-
-void FileList::updateFile(QString sharedName)
-{
-    files[sharedName]->forceUpdate();
+    if (!db->isOpen())
+        db->open();
+    db->exec("CREATE TABLE files (id INTEGER PRIMARY KEY, shareName VARCHAR(64), fileHash VARCHAR(128), filePath TEXT)");
+    return true;
 }

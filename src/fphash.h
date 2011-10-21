@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,12 @@
 #define FPHASH_H
 
 #include <QByteArray>
+#include <QCryptographicHash>
 
 class FPHash
 {
 public:
+
     static const quint64 HASH_BUFFER_SIZE = 5242880; // 5MB
     static QByteArray getFileHash( const QString &fileName );
 private:

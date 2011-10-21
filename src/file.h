@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,14 @@
 
 #include <QObject>
 #include <QByteArray>
+#include <QSqlQuery>
 
 class File : public QObject
 {
     Q_OBJECT
 public:
-    explicit File(QObject *parent = 0, const QString path = 0);
+    explicit File(QObject *parent = 0, const uint32_t id = 0, const QString path = 0, const QString share = 0, const QByteArray hash = 0);
+    static File* fromQuery(QSqlQuery q);
     QByteArray getHashValue();
     QString getFilePath();
     uint64_t getFileSize();
@@ -40,8 +42,10 @@ signals:
 public slots:
 private:
     QString filePath;
+    QString shareName;
     QByteArray hashValue;
     uint64_t fileSize;
+    uint32_t fileId;
 };
 
 #endif // FILE_H

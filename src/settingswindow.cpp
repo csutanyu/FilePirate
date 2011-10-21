@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
 #include "ui_settingswindow.h"
 #include "filepirate.h"
 #include "defines.h"
+#include "fphash.h"
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QInputDialog>
@@ -90,7 +91,7 @@ void SettingsWindow::saveSettings()
     // write settings to the FilePirate::Application object and signal
     // it to write the XML
     FilePirate::Application().username = ui->usernameEdit->text();
-    FilePirate::Application().announceAsAdmin = ui->announceAdminCheck->checkState();
+    FilePirate::Application().announceAsAdmin = ui->announceAdminCheck->isChecked();
     FilePirate::Application().announceKey = ui->announceKeyEdit->text();
     // Download/upload speed limits
     FilePirate::Application().maximumDownload = ui->downloadSpeedSlider->value();
@@ -104,6 +105,21 @@ void SettingsWindow::saveSettings()
     {
         QStringList item = ui->sharedFoldersList->item(i)->text().split(" : ");
         FilePirate::Application().sharedFolders[item[0]] = item[1];
+    }
+    // Hash overrides
+    FilePirate::Application().overridePreferredHash = ui->overrideHashAlgoCheck->isChecked();
+    if (FilePirate::Application().overridePreferredHash)
+    {
+        if (ui->preferrredHashAlgorithm->currentText() == "MD4")
+            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Md4;
+        else if (ui->preferrredHashAlgorithm->currentText() == "MD5")
+            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Md5;
+        else if (ui->preferrredHashAlgorithm->currentText() == "SHA1")
+            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Sha1;
+        else
+            FilePirate::Application().overridePreferredHash = false;
+    } else {
+        FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Sha1;
     }
     // Signal to save
     FilePirate::Application().saveSettings();

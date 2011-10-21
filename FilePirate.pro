@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui xml
+QT       += core gui xml sql
 
 DEFINES += FILEPIRATE_VERSION=0x000901
 
@@ -19,13 +19,14 @@ SOURCES += \
     regex/pcre.c \
     regex/get.c \
     regex/chartables.c \
-    src/filelist.cpp \
     src/localfilemonitor.cpp \
     src/settingswindow.cpp \
     src/aboutwindow.cpp \
     src/sleepthread.cpp \
     src/file.cpp \
-    src/fphash.cpp
+    src/fphash.cpp \
+    src/localfilelist.cpp \
+    src/filelist.cpp
 
 HEADERS  += \
     src/filepirate.h \
@@ -33,14 +34,15 @@ HEADERS  += \
     regex/pcre.h \
     regex/internal.h \
     regex/config.h \
-    src/filelist.h \
     src/localfilemonitor.h \
     src/settingswindow.h \
     src/aboutwindow.h \
     src/sleepthread.h \
     src/file.h \
     src/fphash.h \
-    src/defines.h
+    src/defines.h \
+    src/localfilelist.h \
+    src/filelist.h
 
 FORMS    += \
     src/mainwindow.ui \
@@ -55,4 +57,10 @@ RC_FILE += filepirate.rc
 OTHER_FILES += \
     filepirate.rc \
     filepirate.ico
+
+
+
+
+
+
 

@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,6 +21,7 @@
 */
 
 #include "fphash.h"
+#include "filepirate.h"
 #include <QByteArray>
 #include <QFile>
 #include <QCryptographicHash>
@@ -34,9 +35,15 @@ QByteArray FPHash::getFileHash(const QString &fileName)
     {
         if (file.open(QIODevice::ReadOnly))
         {
+            // Gather hashes piecemeal using MD5
             while (!file.atEnd())
                 byteArray.append(QCryptographicHash::hash(file.read(HASH_BUFFER_SIZE),QCryptographicHash::Md5));
-            byteArray = QCryptographicHash::hash(byteArray,QCryptographicHash::Sha1);
+            // And finally hash the entire array
+            if (FilePirate::Application().overridePreferredHash) {
+                byteArray = QCryptographicHash::hash(byteArray,FilePirate::Application().overriddenHashAlgorithm);
+            } else {
+                byteArray = QCryptographicHash::hash(byteArray,QCryptographicHash::Sha1);
+            }
         }
     }
 

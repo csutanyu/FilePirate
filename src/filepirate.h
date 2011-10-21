@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2010 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -20,16 +20,18 @@
 * THE SOFTWARE.
 */
 
+#include <QDebug>
+
+#ifndef FILEPIRATE_H
+#define FILEPIRATE_H
+
 #include <QObject>
 #include <QUrl>
 #include <QStringList>
 #include <QThread>
-
-#include "filelist.h"
+#include <QCryptographicHash>
+#include "localfilelist.h"
 #include "localfilemonitor.h"
-
-#ifndef FILEPIRATE_H
-#define FILEPIRATE_H
 
 class FilePirate : public QObject
 {
@@ -41,19 +43,22 @@ public:
         static FilePirate instance;
         return instance;
     }
+
+    static QString StoragePath;
+
     void saveSettings();
     bool loadSettings();
     void moveHelpersToThreads();
 
     LocalFileMonitor* fileMon;
-    FileList* localFileList;
+    LocalFileList* localList;
     QMap<QString, QString> sharedFolders;
     QString username;
     QString defaultDownloadPath;
     bool announceAsAdmin;
     QString announceKey;
     bool overridePreferredHash;
-    uint16_t overriddenHashAlgorithm;
+    QCryptographicHash::Algorithm overriddenHashAlgorithm;
     bool allocateAllDownloads;
     bool appendUploadingUsername;
     bool enableAVIntegration;

@@ -20,6 +20,37 @@
 * THE SOFTWARE.
 */
 
-#include "sleepthread.h"
 
-SleepThread::SleepThread(){}
+#ifndef LOCALFILELIST_H
+#define LOCALFILELIST_H
+
+#include <QObject>
+#include <QPointer>
+#include <QMap>
+#include <QList>
+#include <QtSql/QSqlDatabase>
+
+#include "file.h"
+
+class LocalFileList : public QObject
+{
+    Q_OBJECT
+public:
+    explicit LocalFileList(QObject *parent = 0);
+    void addFile(QString path);
+    void removeFile(uint32_t id);
+    File* getFile(uint32_t id);
+    void clear();
+    void clearFolder(QString sharedFolder);
+    void updateFile(uint32_t id);
+    bool fileExists(QString path);
+signals:
+    void shareSizeChanged(ulong size);
+    void fileListChanged();
+public slots:
+private:
+    QSqlDatabase *db;
+    uint64_t listSize;
+};
+
+#endif // LOCALFILELIST_H
