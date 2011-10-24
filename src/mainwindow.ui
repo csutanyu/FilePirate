@@ -51,6 +51,38 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <property name="movable">
+    <bool>false</bool>
+   </property>
+   <property name="iconSize">
+    <size>
+     <width>16</width>
+     <height>16</height>
+    </size>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+   <addaction name="actionChat"/>
+   <addaction name="actionRefresh"/>
+   <addaction name="separator"/>
+   <addaction name="actionFinished_Downloads"/>
+   <addaction name="actionFinished_Uploads"/>
+   <addaction name="actionDownload_Queue"/>
+   <addaction name="separator"/>
+   <addaction name="actionNetwork_Statistics"/>
+   <addaction name="actionEvent_Log"/>
+   <addaction name="actionSecurity_Options"/>
+   <addaction name="separator"/>
+   <addaction name="actionSearch"/>
+  </widget>
   <action name="actionAbout_FilePirate">
    <property name="text">
     <string>About FilePirate...</string>
@@ -64,6 +96,114 @@
   <action name="actionSettings">
    <property name="text">
     <string>S&amp;ettings</string>
+   </property>
+  </action>
+  <action name="actionFinished_Downloads">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/FinishedDL.ico</normaloff>:/icons/res/FinishedDL.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Finished Downloads</string>
+   </property>
+   <property name="toolTip">
+    <string>Finished Downloads</string>
+   </property>
+  </action>
+  <action name="actionFinished_Uploads">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/FinishedUL.ico</normaloff>:/icons/res/FinishedUL.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Finished Uploads</string>
+   </property>
+   <property name="toolTip">
+    <string>Finished Uploads</string>
+   </property>
+  </action>
+  <action name="actionDownload_Queue">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/Queue.ico</normaloff>:/icons/res/Queue.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Download Queue</string>
+   </property>
+   <property name="toolTip">
+    <string>Download Queue</string>
+   </property>
+  </action>
+  <action name="actionNetwork_Statistics">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/netstats.ico</normaloff>:/icons/res/netstats.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Network Statistics</string>
+   </property>
+   <property name="toolTip">
+    <string>Network Statistics</string>
+   </property>
+  </action>
+  <action name="actionSearch">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/Search.ico</normaloff>:/icons/res/Search.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Search</string>
+   </property>
+   <property name="toolTip">
+    <string>Search</string>
+   </property>
+  </action>
+  <action name="actionRefresh">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/Refresh.ico</normaloff>:/icons/res/Refresh.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Refresh</string>
+   </property>
+   <property name="toolTip">
+    <string>Refresh</string>
+   </property>
+  </action>
+  <action name="actionSecurity_Options">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/Keys.ico</normaloff>:/icons/res/Keys.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Security Options</string>
+   </property>
+   <property name="toolTip">
+    <string>Security Options</string>
+   </property>
+  </action>
+  <action name="actionChat">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/text-balloon.ico</normaloff>:/icons/res/text-balloon.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Chat</string>
+   </property>
+   <property name="toolTip">
+    <string>Chat</string>
+   </property>
+  </action>
+  <action name="actionEvent_Log">
+   <property name="icon">
+    <iconset resource="../resource.qrc">
+     <normaloff>:/icons/res/eventlog.ico</normaloff>:/icons/res/eventlog.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Event Log</string>
+   </property>
+   <property name="toolTip">
+    <string>Event Log</string>
    </property>
   </action>
  </widget>

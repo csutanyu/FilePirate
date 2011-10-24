@@ -16,5 +16,12 @@
         <file>res/Recents.ico</file>
         <file>res/Search.ico</file>
         <file>res/tray_icon.ico</file>
+        <file>res/Refresh.ico</file>
+        <file>res/Sort.ico</file>
+        <file>res/eventlog.ico</file>
+        <file>res/Keys.ico</file>
+        <file>res/servers.ico</file>
+        <file>res/SingleMessage.ico</file>
+        <file>res/text-balloon.ico</file>
     </qresource>
 </RCC>

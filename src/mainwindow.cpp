@@ -32,6 +32,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     // connect signals and shit
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(exitClicked()));
     connect(ui->actionAbout_FilePirate,SIGNAL(triggered()),this,SLOT(aboutClicked()));
@@ -49,6 +50,11 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::resizeEvent(QResizeEvent *)
+{
+    QMainWindow::resizeEvent(e);
 }
 
 void MainWindow::exitClicked()
