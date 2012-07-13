@@ -30,8 +30,11 @@
 #include <QStringList>
 #include <QThread>
 #include <QCryptographicHash>
+#include "net/oceansocket.h"
+#include "admin/adminlock.h"
 #include "localfilelist.h"
 #include "localfilemonitor.h"
+#include "defines.h"
 
 class FilePirate : public QObject
 {
@@ -52,13 +55,13 @@ public:
 
     LocalFileMonitor* fileMon;
     LocalFileList* localList;
+    OceanSocket* ocean;
+    AdminLock* adminLock;
     QMap<QString, QString> sharedFolders;
     QString username;
     QString defaultDownloadPath;
     bool announceAsAdmin;
     QString announceKey;
-    bool overridePreferredHash;
-    QCryptographicHash::Algorithm overriddenHashAlgorithm;
     bool allocateAllDownloads;
     bool appendUploadingUsername;
     bool enableAVIntegration;

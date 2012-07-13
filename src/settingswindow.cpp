@@ -49,7 +49,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     connect(ui->announceAdminCheck, SIGNAL(clicked(bool)), ui->announceKeyEdit, SLOT(setEnabled(bool)));
     connect(ui->announceKeyHelpLink, SIGNAL(clicked()), this, SLOT(launchAnnounceKeyHelpURL()));
     connect(ui->enableAVIntCheck, SIGNAL(clicked(bool)), ui->avIntGroupFrame, SLOT(setEnabled(bool)));
-    connect(ui->overrideHashAlgoCheck, SIGNAL(clicked(bool)), ui->preferrredHashAlgorithm, SLOT(setEnabled(bool)));
     connect(ui->addFolderButton, SIGNAL(clicked()), this, SLOT(addSharedFolder()));
     connect(ui->removeFolderButton, SIGNAL(clicked()), this, SLOT(removeSharedFolder()));
 
@@ -60,7 +59,6 @@ SettingsWindow::SettingsWindow(QWidget *parent) :
     ui->uploadSpeedSlider->setValue(FilePirate::Application().maximumUpload);
     ui->downloadSpeedSlider->setValue(FilePirate::Application().maximumDownload);
     ui->announceKeyEdit->setEnabled(ui->announceAdminCheck->checkState() == Qt::Checked);
-    ui->preferrredHashAlgorithm->setEnabled(ui->overrideHashAlgoCheck->checkState() == Qt::Checked);
     ui->enableAVIntCheck->setChecked(FilePirate::Application().enableAVIntegration);
     ui->avExeNameLabel->setText(FilePirate::Application().avExPath.section(DIRECTORY_SEPARATOR,-1));
     ui->defaultDownloadPathEdit->setText(FilePirate::Application().defaultDownloadPath);
@@ -105,21 +103,6 @@ void SettingsWindow::saveSettings()
     {
         QStringList item = ui->sharedFoldersList->item(i)->text().split(" : ");
         FilePirate::Application().sharedFolders[item[0]] = item[1];
-    }
-    // Hash overrides
-    FilePirate::Application().overridePreferredHash = ui->overrideHashAlgoCheck->isChecked();
-    if (FilePirate::Application().overridePreferredHash)
-    {
-        if (ui->preferrredHashAlgorithm->currentText() == "MD4")
-            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Md4;
-        else if (ui->preferrredHashAlgorithm->currentText() == "MD5")
-            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Md5;
-        else if (ui->preferrredHashAlgorithm->currentText() == "SHA1")
-            FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Sha1;
-        else
-            FilePirate::Application().overridePreferredHash = false;
-    } else {
-        FilePirate::Application().overriddenHashAlgorithm = QCryptographicHash::Sha1;
     }
     // Signal to save
     FilePirate::Application().saveSettings();

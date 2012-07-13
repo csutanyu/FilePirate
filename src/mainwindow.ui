@@ -32,6 +32,7 @@
      <string>&amp;File</string>
     </property>
     <addaction name="actionSettings"/>
+    <addaction name="actionRefreshFileList"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -204,6 +205,11 @@
    </property>
    <property name="toolTip">
     <string>Event Log</string>
+   </property>
+  </action>
+  <action name="actionRefreshFileList">
+   <property name="text">
+    <string>Re&amp;fresh file list</string>
    </property>
   </action>
  </widget>

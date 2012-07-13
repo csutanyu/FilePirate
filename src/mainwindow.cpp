@@ -37,6 +37,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionExit,SIGNAL(triggered()),this,SLOT(exitClicked()));
     connect(ui->actionAbout_FilePirate,SIGNAL(triggered()),this,SLOT(aboutClicked()));
     connect(ui->actionSettings,SIGNAL(triggered()),this,SLOT(settingsClicked()));
+    connect(ui->actionRefreshFileList, SIGNAL(triggered()), FilePirate::Application().fileMon, SLOT(refreshTimerEvent()));
 
     if (!FilePirate::Application().settingsLoaded)
     {
@@ -50,11 +51,6 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     delete ui;
-}
-
-void MainWindow::resizeEvent(QResizeEvent *)
-{
-    QMainWindow::resizeEvent(e);
 }
 
 void MainWindow::exitClicked()

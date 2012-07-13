@@ -40,7 +40,6 @@ FilePirate::FilePirate()
     allocateAllDownloads = false;
     appendUploadingUsername = false;
     enableAVIntegration = false;
-    overridePreferredHash = false;
     announceAsAdmin = false;
     defaultDownloadPath = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation) + DIRECTORY_SEPARATOR + "Downloads";
 
@@ -52,10 +51,20 @@ FilePirate::FilePirate()
     this->fileMon = new LocalFileMonitor();
     this->fileMonitorThread = new QThread(this);
 
+
     // Connect all our signals and slots
     connect(this->localList, SIGNAL(shareSizeChanged(ulong)), this, SLOT(localShareSizeChanged(ulong)));
     connect(this->localList, SIGNAL(fileListChanged()), this, SLOT(localListChanged()));
     connect(this, SIGNAL(settingsChanged()), this->fileMon, SLOT(updateWatchPaths()));
+
+    // Ocean socket
+    this->ocean = new OceanSocket(this);
+    connect(this, SIGNAL(settingsChanged()), this->ocean, SLOT(broadcastChanges()));
+
+    // Administrative locks
+    this->adminLock = new AdminLock(this);
+    connect(this->ocean, SIGNAL(adminLockRequested(QHostAddress,QString)), this->adminLock, SLOT(handleLockRequest(QHostAddress,QString)));
+    connect(this->ocean, SIGNAL(adminLockRequestReponse(QHostAddress,bool)), this->adminLock, SLOT(handleLockRequestResponse(QHostAddress,bool)));
 }
 
 void FilePirate::localFileListChanged()

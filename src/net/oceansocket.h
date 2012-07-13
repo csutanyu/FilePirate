@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2012 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,35 @@
 * THE SOFTWARE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef OCEANSOCKET_H
+#define OCEANSOCKET_H
 
 #include <QObject>
-#include <QByteArray>
-#include <QSqlQuery>
-#include "defines.h"
+#include <QTimer>
+#include <QtNetwork/QUdpSocket>
 
-class File : public QObject
+class OceanSocket : public QObject
 {
     Q_OBJECT
 public:
-    explicit File(QObject *parent = 0, const uint32_t id = 0, const QString path = 0, const QString share = 0, const QByteArray hash = 0);
-    static File* fromQuery(QSqlQuery q);
-    QByteArray getHashValue();
-    QString getFilePath();
-    uint64_t getFileSize();
-    void forceUpdate();
+    explicit OceanSocket(QObject *parent = 0);
+    bool sendMessage(const char message_type, QString data);
 signals:
-
+    void shipHeartbeat(QHostAddress host, QString username);
+    void shipChangedCourse(QHostAddress host, QString username);
+    void messageReceived(QHostAddress host, QString username, QString message);
+    void adminLockRequested(QHostAddress host, QString key);
+    void adminLockRequestReponse(QHostAddress host, bool successful, QString key);
 public slots:
+    void broadcastChanges();
+private slots:
+    void heartbeatTimer();
+    void processIncomingWaves();
 private:
-    QString filePath;
-    QString shareName;
-    QByteArray hashValue;
-    uint64_t fileSize;
-    uint32_t fileId;
+    QTimer *heartbeat;
+    QUdpSocket *socket;
+
+    void processMessage(QHostAddress host, QString raw_message);
 };
 
-#endif // FILE_H
+#endif // OCEANSOCKET_H

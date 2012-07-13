@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2012 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,30 @@
 * THE SOFTWARE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef ADMINLOCK_H
+#define ADMINLOCK_H
 
 #include <QObject>
-#include <QByteArray>
-#include <QSqlQuery>
-#include "defines.h"
+#include <QString>
+#include <QtNetwork>
 
-class File : public QObject
+class AdminLock : public QObject
 {
     Q_OBJECT
 public:
-    explicit File(QObject *parent = 0, const uint32_t id = 0, const QString path = 0, const QString share = 0, const QByteArray hash = 0);
-    static File* fromQuery(QSqlQuery q);
-    QByteArray getHashValue();
-    QString getFilePath();
-    uint64_t getFileSize();
-    void forceUpdate();
-signals:
-
-public slots:
+    explicit AdminLock(QObject *parent = 0);
+    static QString lockKey;
+    static bool clientHasLock;
+    void requestAdminLock(QString key);
 private:
-    QString filePath;
-    QString shareName;
-    QByteArray hashValue;
-    uint64_t fileSize;
-    uint32_t fileId;
+    QString temporaryKey;
+signals:
+    void lockResponse(bool success);
+public slots:
+    void handleLockRequest(QHostAddress host, QString key);
+    void handleLockRequestResponse(QHostAddress host, bool success, QString key);
+private slots:
+    void handleLockRequestTimeout();
 };
 
-#endif // FILE_H
+#endif // ADMINLOCK_H

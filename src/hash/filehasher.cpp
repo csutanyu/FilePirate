@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2012 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -20,32 +20,35 @@
 * THE SOFTWARE.
 */
 
-#include "fphash.h"
-#include "filepirate.h"
-#include <QByteArray>
+#include "filehasher.h"
+#include "murmurhash.h"
+#include "../defines.h"
 #include <QFile>
-#include <QCryptographicHash>
+#include <QTextStream>
 
-QByteArray FPHash::getFileHash(const QString &fileName)
+QByteArray FileHasher::hashFile(QString path)
 {
-    QByteArray byteArray;
-    QFile file(fileName);
-
-    if (!file.exists())
-    {
-        if (file.open(QIODevice::ReadOnly))
-        {
-            // Gather hashes piecemeal using MD5
-            while (!file.atEnd())
-                byteArray.append(QCryptographicHash::hash(file.read(HASH_BUFFER_SIZE),QCryptographicHash::Md5));
-            // And finally hash the entire array
-            if (FilePirate::Application().overridePreferredHash) {
-                byteArray = QCryptographicHash::hash(byteArray,FilePirate::Application().overriddenHashAlgorithm);
-            } else {
-                byteArray = QCryptographicHash::hash(byteArray,QCryptographicHash::Sha1);
-            }
-        }
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly))
+        return 0;
+    uint32_t hash[4];
+    uint32_t seed = 42;
+    QByteArray chunk;
+    QByteArray hashValue = QByteArray();
+    while (!file.atEnd()) {
+        chunk = file.read(FILE_HASHING_CHUNK_SIZE);
+        chunk.prepend(hashValue);
+#ifdef ENVIRONMENT32
+        MurmurHash3_x86_128(chunk.data(), chunk.length(), seed, hash);
+#else
+        MurmurHash3_x64_128(chunk.data(), chunk.length(), seed, hash);
+#endif
+        // set our hash to be prepended to the next chunk
+        hashValue = QByteArray::fromRawData(reinterpret_cast<const char*>(hash),4*sizeof(uint32_t));
     }
-
-    return byteArray;
+    return hashValue;
 }
+
+FileHasher::FileHasher(QObject *parent) :
+    QObject(parent)
+{}

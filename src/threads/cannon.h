@@ -1,5 +1,5 @@
 /*
-* Copyright (c) 2011 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
+* Copyright (c) 2012 Jonathan W Enzinna <jonnyfunfun@jonnyfunfun.com>
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -20,33 +20,31 @@
 * THE SOFTWARE.
 */
 
-#ifndef FILE_H
-#define FILE_H
+#ifndef CANNON_H
+#define CANNON_H
 
 #include <QObject>
-#include <QByteArray>
-#include <QSqlQuery>
-#include "defines.h"
+#include <QFile>
+#include <QtNetwork>
+#include <QtNetwork/QTcpServer>
+#include "../file.h"
 
-class File : public QObject
+class Cannon : public QObject
 {
     Q_OBJECT
 public:
-    explicit File(QObject *parent = 0, const uint32_t id = 0, const QString path = 0, const QString share = 0, const QByteArray hash = 0);
-    static File* fromQuery(QSqlQuery q);
-    QByteArray getHashValue();
-    QString getFilePath();
-    uint64_t getFileSize();
-    void forceUpdate();
+    explicit Cannon(QObject *parent = 0, QHostAddress receiver = 0, int port = 0, QFile file = 0);
 signals:
-
-public slots:
+    void progressUpdate(long total, long sent);
+    void complete();
+    void error();
+public slots:        
+    void sendFile();
 private:
-    QString filePath;
-    QString shareName;
-    QByteArray hashValue;
-    uint64_t fileSize;
-    uint32_t fileId;
+    QHostAddress receiver;
+    int port;
+    File* file;
+    QTcpServer* socket;
 };
 
-#endif // FILE_H
+#endif // CANNON_H

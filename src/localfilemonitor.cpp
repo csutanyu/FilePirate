@@ -33,7 +33,7 @@
 LocalFileMonitor::LocalFileMonitor(QObject *parent) :
     QObject(parent)
 {
-    refreshTimer.setInterval(30000000);
+    this->refreshTimer.start(30000000);
     this->fsWatch = new QFileSystemWatcher(this);
     connect(&refreshTimer, SIGNAL(timeout()), this, SLOT(refreshTimerEvent()));
     connect(this->fsWatch, SIGNAL(fileChanged(QString)), this, SLOT(fileChanged(QString)));

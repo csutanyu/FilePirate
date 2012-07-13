@@ -21,7 +21,8 @@
 */
 
 #include "file.h"
-#include "fphash.h"
+#include "defines.h"
+#include "hash/filehasher.h"
 
 #include <QMap>
 #include <QStringList>
@@ -33,17 +34,17 @@
 File::File(QObject *parent, uint32_t id, QString path, QString share, QByteArray hash) :
     QObject(parent)
 {
-    filePath = path;
-    if (hash == 0)
-        hashValue = FPHash::getFileHash(filePath);
+    this->filePath = path;
+    if (hash.isEmpty())
+        this->hashValue = FileHasher::hashFile(path);
     else
-        hashValue = hash;
-    shareName = share;
-    fileId = id;
+        this->hashValue = hash;
+    this->shareName = share;
+    this->fileId = id;
     QFile fh;
     if (fh.open(QIODevice::ReadOnly))
     {
-        fileSize = fh.size();
+        this->fileSize = fh.size();
         fh.close();
     }
 }
@@ -59,21 +60,21 @@ File* File::fromQuery(QSqlQuery q)
 
 uint64_t File::getFileSize()
 {
-    return fileSize;
+    return this->fileSize;
 }
 
 void File::forceUpdate()
 {
-    hashValue = FPHash::getFileHash(filePath);
+    this->hashValue = FileHasher::hashFile(filePath);
     QFile fh;
     if (fh.open(QIODevice::ReadOnly))
     {
-        fileSize = fh.size();
+        this->fileSize = fh.size();
         fh.close();
     }
 }
 
 QString File::getFilePath()
 {
-    return filePath;
+    return this->filePath;
 }
